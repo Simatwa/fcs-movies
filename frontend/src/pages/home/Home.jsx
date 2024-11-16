@@ -3,7 +3,7 @@ import HomeScreen from './HomeScreen';
 import AuthScreen from './AuthScreen';
 
 const Home = () => {
-  const user = true;
+  const user = false;
 
   return (
     <div >
