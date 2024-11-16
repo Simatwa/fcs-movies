@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from fastapi.encoders import jsonable_encoder
 import backend.v1.models as models
-import backend.v1.utils as utils
+import backend.utils as utils
 from fzmovies_api import Search, Navigate, DownloadLinks, Download
 import fzmovies_api.models as fz_models
 from json import dumps
@@ -20,7 +20,6 @@ async def search(search: models.Search) -> fz_models.SearchResults:
     """Search movies using filters"""
     searchq = Search(query=search.q, searchby=search.searchby, category=search.category)
     resp = searchq.get_all_results(limit=search.limit)
-    print(search.offset)
     if resp.movies and len(resp.movies) > search.offset:
         current_movies = resp.movies
         resp.movies = current_movies[search.offset :]
@@ -64,7 +63,7 @@ async def movie_metadata(target: models.TargetMovie) -> fz_models.MovieFiles:
 @router.post("/download-link", name="Download link metadata")
 @utils.router_exception_handler
 async def download_link(target: models.TargetFilename) -> t.Union[models.DownloadLink]:
-    """Get link to the desire movie-file"""
+    """Get link to the desired movie-file"""
     download_movie = DownloadLinks(
         fz_models.FileMetadata(
             title="some-movie-title",

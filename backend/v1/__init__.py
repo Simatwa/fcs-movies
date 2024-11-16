@@ -4,8 +4,8 @@ this one sources data direct from host in real time.
 """
 
 from fastapi import APIRouter
-from backend.v1.main import router as main_router
+from backend.v1.routes import router
 
 v1_router = APIRouter()
 
-v1_router.include_router(main_router)
+v1_router.include_router(router)

@@ -2,6 +2,7 @@
 
 import re
 from backend.v1 import v1_router
+from backend.v2 import v2_router
 from backend.database import create_all
 from pathlib import Path
 from fastapi import FastAPI, Request
@@ -56,3 +57,6 @@ app.mount("/src", StaticFiles(directory=frontend_path / "src"), name="assets")
 
 app.include_router(v1_router, prefix="/v1", tags=["V1"])
 """Route to v1 of the API"""
+
+app.include_router(v2_router, prefix="/v2", tags=["V2"])
+"""Route to v2 of the API"""

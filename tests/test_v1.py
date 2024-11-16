@@ -1,12 +1,8 @@
 import pytest
-from fastapi.testclient import TestClient
 import fzmovies_api.models as fz_models
 from backend import app
 import backend.v1.models as v1_models
-
-client = TestClient(
-    app,
-)
+from tests import client
 
 
 @pytest.mark.parametrize(
