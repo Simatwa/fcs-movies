@@ -20,7 +20,7 @@ test-api-v1:
 # Target to test RestAPI V2
 test-api-v2:
 	$(PYTHON) -m pytest tests/test_v2.py -xv
-feat: Update Makefile to reflect API testing changes# Target to test RestAPIs v1 and v2
+
 test-apis: test-api-v1 test-api-v2
 
 # Target to test non-APIs
@@ -43,4 +43,4 @@ download-db:
 
 # Target to setup production environment
 # and actually run the server
-deploy: test download-db runserver
+deploy: install test download-db runserver
