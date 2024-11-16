@@ -17,10 +17,16 @@ pip install -r requirements.txt
 ## Fire up server
 
 ```
-python3 manage.py runserver
+$ python -m fastapi run
 ```
 
 You can then access the server from http://localhost:8000, API docs from http://localhost:8000/api/docs and API redocs from http://localhost:8000/api/redoc.
+
+## Deployment
+
+```
+$ make deploy
+```
 
 > [!NOTE]
 > This is a joint project under development.
