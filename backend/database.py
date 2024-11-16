@@ -30,7 +30,6 @@ class Movies(Base):
     description = Column(Text, nullable=True)
     url = Column(String(100), nullable=False)
     cover_photo = Column(String(100), nullable=True)
-    is_shown = Column(Boolean, default=True)
 
     def __repr__(self):
         return f"{self.title} ({self.year})"
