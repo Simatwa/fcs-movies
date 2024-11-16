@@ -20,7 +20,7 @@ pip install -r requirements.txt
 python3 manage.py runserver
 ```
 
-You can then access the server from http://localhost:8000 and api-docs from http://localhost:8000/docs
+You can then access the server from http://localhost:8000, API docs from http://localhost:8000/api/docs and API redocs from http://localhost:8000/api/redoc.
 
 > [!NOTE]
 > This is a joint project under development.

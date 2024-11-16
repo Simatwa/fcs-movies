@@ -62,7 +62,7 @@ async def movie_metadata(target: models.TargetMovie) -> fz_models.MovieFiles:
 
 @router.post("/download-link", name="Download link metadata")
 @utils.router_exception_handler
-async def download_link(target: models.TargetFilename) -> t.Union[models.DownloadLink]:
+async def download_link(target: models.TargetFilename) -> models.DownloadLink:
     """Get link to the desired movie-file"""
     download_movie = DownloadLinks(
         fz_models.FileMetadata(

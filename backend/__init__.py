@@ -43,6 +43,9 @@ app = FastAPI(
         "name": "GPLv3",
         "url": "https://raw.githubusercontent.com/Simatwa/fcs-movies/refs/heads/main/LICENSE",
     },
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
 )
 
 
@@ -55,8 +58,8 @@ def index(request: Request):
 app.mount("/src", StaticFiles(directory=frontend_path / "src"), name="assets")
 """Route to static contents"""
 
-app.include_router(v1_router, prefix="/v1", tags=["V1"])
+app.include_router(v1_router, prefix="/api/v1", tags=["V1"])
 """Route to v1 of the API"""
 
-app.include_router(v2_router, prefix="/v2", tags=["V2"])
+app.include_router(v2_router, prefix="/api/v2", tags=["V2"])
 """Route to v2 of the API"""

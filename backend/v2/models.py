@@ -45,9 +45,9 @@ class V2SearchResultsItem(BaseModel):
         "All",
     ]
     category: t.Literal["Bollywood", "Hollywood", "All"]
-    year: PositiveInt
-    distribution: str
-    description: str
+    year: t.Optional[PositiveInt]
+    distribution: t.Optional[str]
+    description: t.Optional[str]
     url: HttpUrl
     cover_photo: HttpUrl
 
