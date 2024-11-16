@@ -13,18 +13,17 @@ install:
 # Target to run tests
 test: test-apis test-non-apis
 
-# Target to test RestAPIs V1
+# Target to test RestAPI V1
 test-api-v1:
 	$(PYTHON) -m pytest tests/test_v1.py -xv
 
-# Target to test RestAPIs V2
+# Target to test RestAPI V2
 test-api-v2:
 	$(PYTHON) -m pytest tests/test_v2.py -xv
-
-# Target to test APIs v1 and v2
+feat: Update Makefile to reflect API testing changes# Target to test RestAPIs v1 and v2
 test-apis: test-api-v1 test-api-v2
 
-# Target to test RestAPIs V2
+# Target to test non-APIs
 test-non-apis:
 	$(PYTHON) -m pytest tests/test_non_*.py -xv
 
