@@ -1,10 +1,14 @@
 import React from 'react'
 import Navbar from '../../commponents/Navbar'
 import { Link } from 'react-router-dom'
-import { Download, Info, Play } from 'lucide-react'
+import {  Info, Play } from 'lucide-react'
+import useGetTrendingContent from '../../hooks/useGetTrendingContent'
 
 
 const HomeScreen = () => {
+   const {trendingContent} = useGetTrendingContent()
+   console.log("trendingcontent",trendingContent);
+   
   return (
     <>
     <div className='h-screen text-white relative'>
