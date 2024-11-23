@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 parent_path = Path(__file__).parent
 
@@ -50,7 +51,8 @@ app = FastAPI(
 @app.get("/", name="index", response_class=HTMLResponse, include_in_schema=False)
 def index(request: Request):
     """Serve index.html"""
-    return templates.TemplateResponse(request, name="index.html")
+    # return templates.TemplateResponse(request, name="index.html")
+    return RedirectResponse("/api/docs")
 
 
 app.mount("/src", StaticFiles(directory=frontend_path / "src"), name="assets")
