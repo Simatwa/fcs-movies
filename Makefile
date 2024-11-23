@@ -37,7 +37,7 @@ runserver:
 
 # Target to download movies database
 download-db:
-	wget https://raw.githubusercontent.com/Simatwa/movies-dataset/main/data/combined.db \
+	wget https://raw.githubusercontent.com/Simatwa/movies-dataset/main/data/combined-relational.db \
 	-O $(DOWNLOAD_DB_TO) --continue
 	mv $(DOWNLOAD_DB_TO) assets/db.sqlite3
 

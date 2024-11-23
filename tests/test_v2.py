@@ -15,22 +15,30 @@ def test_search(query, genre, category):
     resp = client.get(
         "/api/v2/search", params=dict(q=query, genre=genre, category=category)
     )
+    assert resp.is_success
     jsonified_resp = resp.json()
-    modelled_resp = models.V2SearchResults(**jsonified_resp)
-    assert isinstance(modelled_resp, models.V2SearchResults)
+    models.ShallowSearchResults(**jsonified_resp)
 
 
-def test_search_with_offset():
-    limit = 10
-    offset = 5
-    query = "he"
-    resp_without_offset = client.get(
+def test_search_post():
+    resp = client.post(
         "/api/v2/search",
-        params=dict(q=query, limit=limit),
-    ).json()
-    modelled_without = models.V2SearchResults(**resp_without_offset)
-    resp_with_offset = client.get(
-        "/api/v2/search", params=dict(q=query, limit=limit, offset=offset)
-    ).json()
-    modelled_with = models.V2SearchResults(**resp_with_offset)
-    assert len(modelled_without.movies) > len(modelled_with.movies)
+        json={
+            "category": "Hollywood",
+            "distributions": ["BluRay"],
+            "genres": ["Romance"],
+            "limit": 10,
+            "offset": 0,
+            "query": "Love",
+            "year": 2012,
+            "year_offset": 0,
+        },
+    )
+    assert resp.is_success
+    models.V2SearchResults(**resp.json())
+
+
+def test_search_specific_movie_id():
+    resp = client.get("/api/v2/movie/1")
+    assert resp.is_success
+    models.V2SearchResultsItem(**resp.json())

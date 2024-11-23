@@ -3,14 +3,12 @@
 import re
 from backend.v1 import v1_router
 from backend.v2 import v2_router
-from backend.database import create_all
+from backend.database import create_tables
 from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-
-create_all()
 
 parent_path = Path(__file__).parent
 
@@ -49,7 +47,7 @@ app = FastAPI(
 )
 
 
-@app.get("/", name="index", response_class=HTMLResponse)
+@app.get("/", name="index", response_class=HTMLResponse, include_in_schema=False)
 def index(request: Request):
     """Serve index.html"""
     return templates.TemplateResponse(request, name="index.html")
@@ -63,3 +61,5 @@ app.include_router(v1_router, prefix="/api/v1", tags=["V1"])
 
 app.include_router(v2_router, prefix="/api/v2", tags=["V2"])
 """Route to v2 of the API"""
+
+app.add_event_handler("startup", create_tables)

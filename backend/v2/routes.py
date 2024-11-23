@@ -1,85 +1,87 @@
 """V2 Routes"""
 
 import typing as t
-from fastapi import APIRouter
-from fastapi.encoders import jsonable_encoder
+from fastapi import APIRouter, HTTPException, status, Query, Path
 import backend.v2.models as models
-import backend.database as db
+from backend.database import Movie, Category, Genre
 import backend.utils as utils
 from backend.config import config
+from backend.database import session
+from sqlalchemy import text
 
 router = APIRouter()
+
+total_movies = session.execute(text("SELECT COUNT(id) FROM movie")).first()[0]
 
 
 @router.get("/search", name="Search movie")
 @utils.router_exception_handler
 async def search_movie(
-    q: t.Optional[str] = None,
-    genre: t.Optional[
-        t.Literal[
-            "Action",
-            "Adventure",
-            "Animation",
-            "Biography",
-            "Comedy",
-            "Crime",
-            "Documentary",
-            "Drama",
-            "Family",
-            "Fantasy",
-            "Film-Noir",
-            "History",
-            "Horror",
-            "Music",
-            "Musical",
-            "Mystery",
-            "Romance",
-            "Sci-Fi",
-            "Sport",
-            "Thriller",
-            "War",
-            "Western",
-            "All",
-        ]
-    ] = "All",
-    category: t.Optional[t.Literal["Bollywood", "Hollywood", "All"]] = "All",
-    year: t.Optional[int] = 0,
-    description: t.Optional[str] = None,
-    distribution: t.Optional[str] = "All",
-    limit: t.Optional[int] = config.search_limit_per_query,
-    offset: t.Optional[int] = 0,
-    index: t.Optional[int] = 0,
-) -> models.V2SearchResults:
-    """Search movies from cache
-    - `q` : Movie title.
-    - `genre` : Movie genre.
-    - `category`: Movie category.
-    - `year` : Movie release year.
-    - `description` : Movie about.
-    - `distribution` : Distribution format.
-    - `limit` : Search limit.
-    - `offset` : Results offset.
-    - `index` : Movie index offset.
+    q: str = Query(description="Movie title"),
+    limit: t.Optional[int] = Query(
+        config.search_limit_per_query, description="Total movie titles not to exceed"
+    ),
+    offset: t.Optional[int] = Query(0, description="Search results offset"),
+    year_offset: t.Optional[int] = Query(0, description="Movie realease year offset"),
+) -> models.ShallowSearchResults:
+    """Search movies from cache and return shallow results"""
+    movies = (
+        session.query(Movie)
+        .filter(Movie.title.like(f"%{q}%"), Movie.year > year_offset)
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return models.ShallowSearchResults(
+        query=q, results=[dict(id=movie.id, title=str(movie)) for movie in movies]
+    )
+
+
+@router.post("/search", name="Search movies deeply")
+@utils.router_exception_handler
+async def search_movies_by_post(search: models.SearchByPost) -> models.V2SearchResults:
+    """Search movies from cache and return whole movie metadata"""
+    filters = [Movie.year >= search.year_offset]
+    if search.query:
+        filters.append(Movie.title.like(f"%{search.query}%"))
     """
-    search_filters = []
+    if search.category:
+        filters.append(
+            Movie.category.name == search.category
+            )
+    if search.genres:
+        filters.append(
+            Movie.genres.name.in_(search.genres)
+            )
+    """
+    if search.description:
+        filters.append(Movie.description.like(f"%{search.description}%"))
+    if search.distributions:
+        filters.append(Movie.distribution.in_(search.distributions))
+    if search.year:
+        filters.append(Movie.year == search.year)
 
-    if q:
-        search_filters.append(db.Movies.title.like(f"%{q}%"))
-    if genre != "All":
-        search_filters.append(db.Movies.genre.like(f"%{genre}%"))
-    if category != "All":
-        search_filters.append(db.Movies.category.like(f"%{category}%"))
-    if year:
-        search_filters.append(db.Movies.year == year)
-    if description:
-        search_filters.append(db.Movies.description.like(f"%{description}%"))
-    if distribution != "All":
-        search_filters.append(db.Movies.distribution.like(f"%{distribution}%"))
-    if index:
-        search_filters.append(db.Movies.index > index)
+    movies = (
+        session.query(Movie)
+        .filter(*filters)
+        .offset(search.offset)
+        .limit(search.limit)
+        .all()
+    )
+    return models.V2SearchResults(
+        query=search.query, movies=[movie.model_dump() for movie in movies]
+    )
 
-    results = db.session.query(db.Movies).filter(*search_filters).limit(limit).all()
-    sorted_results = [jsonable_encoder(result) for result in results]
-    if len(sorted_results) > offset:
-        sorted_results = sorted_results[offset:]
-    return models.V2SearchResults(movies=sorted_results)
+
+@router.get("/movie/{id}")
+def get_specific_movie_info(
+    id: int = Path(description="Movie id", ge=1, le=total_movies)
+) -> models.V2SearchResultsItem:
+    """Get metadata for a particular movie"""
+    movie = session.get(Movie, id)
+    if not movie:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"There's no movie with id '{id}.'",
+        )
+    return models.V2SearchResultsItem(**movie.model_dump())
