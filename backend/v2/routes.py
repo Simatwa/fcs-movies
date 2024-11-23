@@ -8,6 +8,9 @@ import backend.utils as utils
 from backend.config import config
 from backend.database import session
 from sqlalchemy import text
+import fzmovies_api.models as fz_models
+from fzmovies_api import Navigate, DownloadLinks, Download
+from backend.v1 import models as v1_models
 
 router = APIRouter()
 
@@ -74,7 +77,8 @@ async def search_movies_by_post(search: models.SearchByPost) -> models.V2SearchR
 
 
 @router.get("/movie/{id}")
-def get_specific_movie_info(
+@utils.router_exception_handler
+async def get_specific_movie_info(
     id: int = Path(description="Movie id", ge=1, le=total_movies)
 ) -> models.V2SearchResultsItem:
     """Get metadata for a particular movie"""
@@ -85,3 +89,70 @@ def get_specific_movie_info(
             detail=f"There's no movie with id '{id}.'",
         )
     return models.V2SearchResultsItem(**movie.model_dump())
+
+
+@router.get("/metadata/{id}")
+@utils.router_exception_handler
+async def get_movie_metadata_2(
+    id: int = Path(description="Movie id", ge=1, le=total_movies)
+) -> v1_models.MovieFiles:
+    """Get metadata for a particular movie"""
+    movie = session.get(Movie, id)
+    if not movie:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"There's no movie with id '{id}.'",
+        )
+    nav = Navigate(
+        fz_models.MovieInSearch(
+            url=movie.url,
+            title="",
+            year=1,
+            distribution="",
+            about="",
+            cover_photo="https://somelink-here",
+        )
+    )
+    return nav.results
+
+
+@router.get("/download-link/{id}", name="Download link metadata")
+@utils.router_exception_handler
+async def download_link_by_id(
+    id: int = Path(description="Movie id", ge=1, le=total_movies),
+    quality: t.Literal["normal", "best"] = Query(
+        "best", description="Movie file quality"
+    ),
+) -> v1_models.DownloadLink:
+    """Get link to the desired movie-file"""
+    movie = session.get(Movie, id)
+    if not movie:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"There's no movie with id '{id}.'",
+        )
+
+    nav = Navigate(
+        fz_models.MovieInSearch(
+            url=movie.url,
+            title="",
+            year=1,
+            distribution="",
+            about="",
+            cover_photo="https://somelink-here",
+        )
+    )
+    target_file = nav.results.files[0 if quality == "normal" else 1]
+    download_movie = DownloadLinks(
+        fz_models.FileMetadata(
+            title="some-movie-title",
+            url=target_file.url,
+            size="",
+            hits=0,
+            mediainfo="https://yet-another-link",
+        )
+    ).results
+    filename = download_movie.filename
+    target_link = download_movie.links[0]
+    movie_file = Download(target_link).last_url
+    return v1_models.DownloadLink(filename=filename, url=movie_file)

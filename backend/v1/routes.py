@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.post("/search", name="Search")
 @utils.router_exception_handler
-async def search(search: models.Search) -> fz_models.SearchResults:
+async def search(search: models.Search) -> models.SearchResults:
     """Search movies using filters"""
     searchq = Search(query=search.q, searchby=search.searchby, category=search.category)
     resp = searchq.get_all_results(limit=search.limit)
@@ -30,7 +30,7 @@ async def search(search: models.Search) -> fz_models.SearchResults:
 @utils.router_exception_handler
 async def search_stream(
     search: models.SearchStream,
-) -> t.Annotated[t.Generator[fz_models.SearchResults, None, None], StreamingResponse]:
+) -> t.Annotated[t.Generator[models.SearchResults, None, None], StreamingResponse]:
     """Search movies using filters and stream results"""
     searchq = Search(query=search.q, searchby=search.searchby, category=search.category)
 
@@ -45,7 +45,7 @@ async def search_stream(
 
 @router.post("/metadata", name="Movie metadata")
 @utils.router_exception_handler
-async def movie_metadata(target: models.TargetMovie) -> fz_models.MovieFiles:
+async def movie_metadata(target: models.TargetMovie) -> models.MovieFiles:
     """Get metadata for a particular movie"""
     nav = Navigate(
         fz_models.MovieInSearch(

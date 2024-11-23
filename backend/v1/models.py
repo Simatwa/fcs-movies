@@ -4,6 +4,9 @@ from pydantic import BaseModel, PositiveInt, field_validator, HttpUrl
 import typing as t
 from backend.config import config
 import re
+from fzmovies_api.models import MovieFiles as FzMovieFiles
+from fzmovies_api.models import SearchResults as FzSearchResults
+from fzmovies_api.models import MovieInSearch as FzMovieInSearch
 
 
 class Search(BaseModel):
@@ -185,6 +188,84 @@ class DownloadLink(BaseModel):
             "example": {
                 "filename": "Fast_and_Furious_7_BluRay_high.mp4",
                 "url": "https://ik2mqisu1w.b34zobxzxs73nkfxike1.cfd/res/614774a84bca32182e1b81d831542d9a/e5f8078be8df179e5497e448dc163aaf/Fast_and_Furious_7_(2015)_BluRay_high_(fzmovies.net)_f54b7581dcde1c46de8365af485a3836.mp4?fromwebsite",
+            }
+        }
+    }
+
+
+class SearchResults(FzSearchResults):
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "movies": [
+                    {
+                        "url": "https://fzmovies.net/movie-Fast%20and%20Furious%20Presents%20-%20Hobbs%20and%20Shaw--hmp4.htm",
+                        "title": "Fast and Furious Presents - Hobbs and Shaw",
+                        "year": 2019,
+                        "distribution": "BluRay",
+                        "about": "Lawman Luke Hobbs and outcast Deckard Shaw form an unlikely alliance when a cyber-genetically enhanced villain threatens the future of humanity.",
+                        "cover_photo": "https://fzmovies.net/imdb_images/Hobbs.and.Shaw.2019.jpg",
+                    },
+                    {
+                        "url": "https://fzmovies.net/movie-Fast%20and%20Furious%209--hmp4.htm",
+                        "title": "Fast and Furious 9",
+                        "year": 2021,
+                        "distribution": "BluRay",
+                        "about": "Cypher enlists the help of Jakob, Dom's younger brother to take revenge on Dom and his team.",
+                        "cover_photo": "https://fzmovies.net/imdb_images/Fast.And.Furious.9.2021.jpg",
+                    },
+                ],
+                "first_page": None,
+                "previous_page": None,
+                "next_page": None,
+                "last_page": None,
+            }
+        }
+    }
+
+
+class MovieFiles(FzMovieFiles):
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "files": [
+                    {
+                        "title": "The Manson Family BluRay 480p.mp4",
+                        "url": "https://fzmovies.net/download1.php?downloadoptionskey=3-41760-750fa9a3ff2cefd8f133cb6e42ba679e",
+                        "size": "253 MB",
+                        "hits": 2160,
+                        "mediainfo": "https://fzmovies.net/mediainfo.php?downloadoptionskey=3-41760-750fa9a3ff2cefd8f133cb6e42ba679e",
+                        "ss": "https://fzmovies.net/ss.php?downloadoptionskey=3-41760-750fa9a3ff2cefd8f133cb6e42ba679e",
+                    },
+                    {
+                        "title": "The Manson Family BluRay 720p.mkv",
+                        "url": "https://fzmovies.net/download1.php?downloadoptionskey=5-39728-84d89bd8c2c6a1476ce244293acc623a",
+                        "size": "678 MB",
+                        "hits": 111,
+                        "mediainfo": "https://fzmovies.net/mediainfo.php?downloadoptionskey=5-39728-84d89bd8c2c6a1476ce244293acc623a",
+                        "ss": "https://fzmovies.net/ss.php?downloadoptionskey=5-39728-84d89bd8c2c6a1476ce244293acc623a",
+                    },
+                ],
+                "trailer": None,
+                "recommended": [
+                    {
+                        "title": "Assassins Run",
+                        "url": "https://fzmovies.net/movie-Assassins%20Run--hmp4.htm",
+                        "cover_photo": "https://fzmovies.net/imdb_images/Assassins%20Run.jpg",
+                    },
+                    {
+                        "title": "The Shawshank Redemption",
+                        "url": "https://fzmovies.net/movie-The%20Shawshank%20Redemption--hmp4.htm",
+                        "cover_photo": "https://fzmovies.net/imdb_images/The%20Shawshank%20Redemption.jpg",
+                    },
+                    {
+                        "title": "The Lost Legion",
+                        "url": "https://fzmovies.net/movie-The%20Lost%20Legion--hmp4.htm",
+                        "cover_photo": "https://fzmovies.net/imdb_images/The.Lost.Legion.2014.jpg",
+                    },
+                ],
             }
         }
     }

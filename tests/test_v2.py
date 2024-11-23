@@ -1,6 +1,8 @@
 import pytest
 from tests import client
+from backend.v1 import models as v1_models
 from backend.v2 import models
+import fzmovies_api.models as fz_models
 
 
 @pytest.mark.parametrize(
@@ -39,6 +41,16 @@ def test_search_post():
 
 
 def test_search_specific_movie_id():
-    resp = client.get("/api/v2/movie/1")
+    id = 1
+    resp = client.get(f"/api/v2/movie/{id}")
     assert resp.is_success
     models.V2SearchResultsItem(**resp.json())
+
+
+def test_download_link_by_id():
+    id = 1
+    resp = client.get(
+        f"/api/v2/download-link/{id}",
+    )
+    assert resp.is_success
+    v1_models.DownloadLink(**resp.json())
