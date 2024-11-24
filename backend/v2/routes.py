@@ -12,6 +12,7 @@ import fzmovies_api.models as fz_models
 from fzmovies_api import Navigate, DownloadLinks, Download
 from backend.v1 import models as v1_models
 from datetime import timedelta
+from sqlite3 import OperationalError
 
 router = APIRouter()
 
@@ -29,8 +30,12 @@ def clear_expired_download_links():
     )
     for table in ["normal_download_link", "best_download_link"]:
         logger.info(f"Clearing expired download links in {table} table")
-        session.execute(text(f"DELETE FROM {table} WHERE updated_on > '{time}'"))
-    session.commit()
+        try:
+            session.execute(text(f"DELETE FROM {table} WHERE updated_on > '{time}'"))
+            session.commit()
+        except OperationalError:
+            # Tables are missing which is still okay
+            pass
 
 
 router.add_event_handler("startup", clear_expired_download_links)
