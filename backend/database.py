@@ -9,7 +9,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from backend.config import config
-from datetime import datetime
 from backend.utils import utcnow
 
 engine = create_engine(config.database_engine)
