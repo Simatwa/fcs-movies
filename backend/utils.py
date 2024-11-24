@@ -5,7 +5,6 @@ from functools import wraps
 from fastapi import status
 from fastapi.exceptions import HTTPException
 from fzmovies_api.errors import SessionExpired
-from fzmovies_api.hunter import Metadata
 import typing as t
 from datetime import datetime, UTC
 from backend.config import logger

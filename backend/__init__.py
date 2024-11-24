@@ -49,7 +49,7 @@ app = FastAPI(
 
 
 @app.get("/", name="index", response_class=HTMLResponse, include_in_schema=False)
-def index(request: Request):
+async def index(request: Request):
     """Serve index.html"""
     # return templates.TemplateResponse(request, name="index.html")
     return RedirectResponse("/api/docs")

@@ -7,7 +7,7 @@ import typing as t
 import re
 import logging
 
-logger = logging.getLogger("fcs_movies")
+logger = logging.getLogger("uvicorn")
 
 
 class Config(BaseModel):
