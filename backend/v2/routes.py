@@ -12,7 +12,7 @@ import fzmovies_api.models as fz_models
 from fzmovies_api import Navigate, DownloadLinks, Download
 from backend.v1 import models as v1_models
 from datetime import timedelta
-from sqlite3 import OperationalError
+from sqlalchemy.exc import OperationalError
 
 router = APIRouter()
 
