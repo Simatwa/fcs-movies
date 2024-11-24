@@ -31,7 +31,7 @@ def clear_expired_download_links():
     for table in ["normal_download_link", "best_download_link"]:
         logger.info(f"Clearing expired download links in {table} table")
         try:
-            session.execute(text(f"DELETE FROM {table} WHERE updated_on > '{time}'"))
+            session.execute(text(f"DELETE FROM {table} WHERE updated_on < '{time}'"))
             session.commit()
         except OperationalError:
             # Tables are missing which is still okay
@@ -46,7 +46,10 @@ router.add_event_handler("startup", clear_expired_download_links)
 async def search_movie(
     q: str = Query(description="Movie title"),
     limit: t.Optional[int] = Query(
-        config.search_limit_per_query, description="Total movie titles not to exceed"
+        config.search_limit_per_query,
+        description="Total movie titles not to exceed",
+        gt=0,
+        le=config.search_limit_per_query,
     ),
     offset: t.Optional[int] = Query(0, description="Search results offset"),
     year_offset: t.Optional[int] = Query(0, description="Movie realease year offset"),

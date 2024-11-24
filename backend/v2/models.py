@@ -1,7 +1,7 @@
 """Pydantic models"""
 
 import typing as t
-from pydantic import BaseModel, PositiveInt, HttpUrl, Field
+from pydantic import BaseModel, PositiveInt, HttpUrl, Field, field_validator
 from backend.config import config
 
 
@@ -124,6 +124,15 @@ class SearchByPost(BaseModel):
             }
         }
     }
+
+    @field_validator("limit")
+    def validate_limit(value):
+        if value > config.search_limit_per_query:
+            raise ValueError(
+                "Search limit value exceeds total possible limit set"
+                f" per query {config.search_limit_per_query}"
+            )
+        return value
 
 
 class V2SearchResultsItem(BaseModel):
