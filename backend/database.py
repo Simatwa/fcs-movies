@@ -1,6 +1,16 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey
+from sqlalchemy import (
+    create_engine,
+    Column,
+    Integer,
+    String,
+    Text,
+    ForeignKey,
+    DateTime,
+)
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from backend.config import config
+from datetime import datetime
+from backend.utils import utcnow
 
 engine = create_engine(config.database_engine)
 """Initialized db engine"""
@@ -86,6 +96,36 @@ class Movie(Base):
 
     def __str__(self):
         return f"{self.title} ({self.year})"
+
+
+class NormalDownloadLink(Base):
+    __tablename__ = "normal_download_link"
+    id = Column(Integer, primary_key=True)
+    filename = Column(String(60), nullable=False)
+    url = Column(Text, nullable=False)
+    updated_on = Column(
+        DateTime,
+        default=utcnow,
+        onupdate=utcnow,
+    )
+
+    def model_dump(self) -> dict[str, str]:
+        return dict(filename=self.filename, url=self.url)
+
+
+class BestDownloadLink(Base):
+    __tablename__ = "best_download_link"
+    id = Column(Integer, primary_key=True)
+    filename = Column(String(60), nullable=False)
+    url = Column(Text, nullable=False)
+    updated_on = Column(
+        DateTime,
+        default=utcnow,
+        onupdate=utcnow,
+    )
+
+    def model_dump(self) -> dict[str, str]:
+        return dict(filename=self.filename, url=self.url)
 
 
 def create_tables(drop_all: bool = False):

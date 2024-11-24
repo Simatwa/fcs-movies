@@ -3,18 +3,37 @@
 import typing as t
 from fastapi import APIRouter, HTTPException, status, Query, Path
 import backend.v2.models as models
-from backend.database import Movie, Category, Genre
-import backend.utils as utils
-from backend.config import config
+from backend.database import Movie, NormalDownloadLink, BestDownloadLink
 from backend.database import session
+import backend.utils as utils
+from backend.config import config, logger
 from sqlalchemy import text
 import fzmovies_api.models as fz_models
 from fzmovies_api import Navigate, DownloadLinks, Download
 from backend.v1 import models as v1_models
+from datetime import timedelta
 
 router = APIRouter()
 
 total_movies = session.execute(text("SELECT COUNT(id) FROM movie")).first()[0]
+
+quality_model_map = {
+    "normal": NormalDownloadLink,
+    "best": BestDownloadLink,
+}
+
+
+def clear_expired_download_links():
+    time = utils.utcnow().replace(tzinfo=None) - timedelta(
+        hours=config.download_link_cache_duration_in_hours
+    )
+    for table in ["normal_download_link", "best_download_link"]:
+        logger.info(f"Clearing expired download links in {table} table")
+        session.execute(text(f"DELETE FROM {table} WHERE updated_on > '{time}'"))
+    session.commit()
+
+
+router.add_event_handler("startup", clear_expired_download_links)
 
 
 @router.get("/search", name="Search movie")
@@ -132,6 +151,13 @@ async def download_link_by_id(
             detail=f"There's no movie with id '{id}.'",
         )
 
+    download_link_model: BestDownloadLink = quality_model_map[quality]
+    cached_results: BestDownloadLink = session.get(download_link_model, id)
+    if cached_results and (
+        utils.utcnow().replace(tzinfo=None) - cached_results.updated_on
+    ) < timedelta(hours=config.download_link_cache_duration_in_hours):
+        return v1_models.DownloadLink(**cached_results.model_dump())
+
     nav = Navigate(
         fz_models.MovieInSearch(
             url=movie.url,
@@ -155,4 +181,12 @@ async def download_link_by_id(
     filename = download_movie.filename
     target_link = download_movie.links[0]
     movie_file = Download(target_link).last_url
+    if cached_results:
+        # Update the url and filename
+        cached_results.url = movie_file
+        cached_results.filename = filename
+    else:
+        # Insert new entry
+        session.add(download_link_model(id=id, filename=filename, url=movie_file))
+    session.commit()
     return v1_models.DownloadLink(filename=filename, url=movie_file)
