@@ -1,5 +1,5 @@
 fastapi[standard]==0.115.5
-fzmovies-api==0.1.4
+fzmovies-api==0.1.5
 python-dotenv==1.0.0
 sqlalchemy==2.0.36
 pytest>=8.3.3
